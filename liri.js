@@ -122,26 +122,29 @@ function doWhatItSays() {
         if (err) {
             return console.log(err);
         } else {
-            // var allCmds = data.split("\n");
+            var allCmds = data.split("\n");
             // console.log(allCmds);
-            if (data.includes(",")) {
-            var textArr = data.split(",");
-            cmd = textArr[0];
-            var textQuery = textArr[1];
-            var textQueryArr = textQuery.split(" ");
-            queryArr = textQueryArr;
-            var textQueryJoined = queryArr.join(" ");
-            var textQueryJoinedPlus = queryArr.join("+");
-            queryJoined = textQueryJoined;
-            queryJoinedPlus = textQueryJoinedPlus;
-            } else {
-                cmd = data;
-            };
-            console.log(cmd);
-            // console.log(queryArr);
-            // console.log(queryJoined);
-            // console.log(queryJoinedPlus);
-            takeCmd();
+            for (var i = 0; i < allCmds.length; i++) {
+                data = allCmds[i];
+                if (data.includes(",")) {
+                    var textArr = data.split(",");
+                    cmd = textArr[0];
+                    var textQuery = textArr[1];
+                    var textQueryArr = textQuery.split(" ");
+                    queryArr = textQueryArr;
+                    var textQueryJoined = queryArr.join(" ");
+                    var textQueryJoinedPlus = queryArr.join("+");
+                    queryJoined = textQueryJoined;
+                    queryJoinedPlus = textQueryJoinedPlus;
+                } else {
+                    cmd = data;
+                };
+                // console.log(cmd);
+                // console.log(queryArr);
+                // console.log(queryJoined);
+                // console.log(queryJoinedPlus);
+                takeCmd();
+            }
         };
     });
 };
