@@ -1,5 +1,6 @@
 require("dotenv").config();
 var keys = require(".//keys.js");
+var fs = require("fs");
 var request = require("request");
 var Twitter = require("twitter");
 var Spotify = require("node-spotify-api");
@@ -10,6 +11,7 @@ var cmd = process.argv[2];
 var queryArr = [];
 var queryJoined = "";
 var queryJoinedPlus = "";
+var divider = "\n==================================================================\n";
 
 function takeCmd() {
     takeQuery();
@@ -43,7 +45,13 @@ function myTweets() {
             for (var i = 0; i < maxTweets; i ++) {
                 console.log("Tweet: " + tweets[i].text);
                 console.log("Created: " + tweets[i].created_at);
+                fs.appendFile("log.txt", "Tweet: " + tweets[i].text + "\nCreated: " + tweets[i].created_at, function(err) {
+                    if (err) throw err;
+                });
             };
+            fs.appendFile("log.txt", divider + "\n", function(err) {
+                if (err) throw err;
+            });
         };
     });
 };
@@ -59,6 +67,9 @@ function spotifyThisSong() {
             console.log("Artist: " + response.tracks.items[7].artists[0].name);
             console.log("Album: " + response.tracks.items[7].album.name);
             console.log("Link: " + response.tracks.items[7].external_urls.spotify);
+            fs.appendFile("log.txt", "Track: " + response.tracks.items[7].name + "\nArtist: " + response.tracks.items[7].artists[0].name + "\nAlbum: " + response.tracks.items[7].album.name + "\nLink: " + response.tracks.items[7].external_urls.spotify + divider + "\n", function(err) {
+                if (err) throw err;
+            });
         }).catch(function(err) {
             console.log(err);
         });
@@ -71,6 +82,9 @@ function spotifyThisSong() {
             console.log("Artist: " + response.tracks.items[0].artists[0].name);
             console.log("Album: " + response.tracks.items[0].album.name);
             console.log("Link: " + response.tracks.items[0].external_urls.spotify);
+            fs.appendFile("log.txt", "Track: " + response.tracks.items[0].name + "\nArtist: " + response.tracks.items[0].artists[0].name + "\nAlbum: " + response.tracks.items[0].album.name + "\nLink: " + response.tracks.items[0].external_urls.spotify + divider + "\n", function(err) {
+                if (err) throw err;
+            });
         }).catch(function(err) {
             console.log(err);
         });
@@ -87,14 +101,18 @@ function movieThis() {
             } else if (!error && response.statusCode === 200) {
             // console.log('statusCode:', response && response.statusCode);
             // console.log('body:', JSON.parse(body));
-            console.log('Title:', JSON.parse(body).Title);
-            console.log('Year:', JSON.parse(body).Year);
-            console.log('IMDB Rating:', JSON.parse(body).imdbRating);
-            console.log('Rotten Tomatoes Rating:', JSON.parse(body).Ratings[1].Value);
-            console.log('Country:', JSON.parse(body).Country);
-            console.log('Language:', JSON.parse(body).Language);
-            console.log('Plot:', JSON.parse(body).Plot);
-            console.log('Actors:', JSON.parse(body).Actors);
+                var jsonData = JSON.parse(body);
+                console.log("Title:" + jsonData.Title);
+                console.log("Year:" + jsonData.Year);
+                console.log("IMDB Rating:" + jsonData.imdbRating);
+                console.log("Rotten Tomatoes Rating:" + jsonData.Ratings[1].Value);
+                console.log("Country:" + jsonData.Country);
+                console.log("Language:" + jsonData.Language);
+                console.log("Plot:" + jsonData.Plot);
+                console.log("Actors:" + jsonData.Actors);
+                fs.appendFile("log.txt", "Title:" + jsonData.Title + "\nYear:" + jsonData.Year + "\nIMDB Rating:" + jsonData.imdbRating + "\nRotten Tomatoes Rating:" + jsonData.Ratings[1].Value + "\nCountry:" + jsonData.Country + "\nLanguage:" + jsonData.Language + "\nPlot:" + jsonData.Plot + "\nActors:" + jsonData.Actors + divider + "\n", function(err) {
+                    if (err) throw err;
+                });
             };
         });
     } else {
@@ -102,16 +120,20 @@ function movieThis() {
             if (error) {
                 console.log('error:', error);
             } else if (!error && response.statusCode === 200) {
-            // console.log('statusCode:', response && response.statusCode);
-            // console.log('body:', JSON.parse(body));
-            console.log('Title:', JSON.parse(body).Title);
-            console.log('Year:', JSON.parse(body).Year);
-            console.log('IMDB Rating:', JSON.parse(body).imdbRating);
-            console.log('Rotten Tomatoes Rating:', JSON.parse(body).Ratings[1].Value);
-            console.log('Country:', JSON.parse(body).Country);
-            console.log('Language:', JSON.parse(body).Language);
-            console.log('Plot:', JSON.parse(body).Plot);
-            console.log('Actors:', JSON.parse(body).Actors);
+                // console.log('statusCode:', response && response.statusCode);
+                // console.log('body:', JSON.parse(body));
+                var jsonData = JSON.parse(body);
+                console.log("Title:" + jsonData.Title);
+                console.log("Year:" + jsonData.Year);
+                console.log("IMDB Rating:" + jsonData.imdbRating);
+                console.log("Rotten Tomatoes Rating:" + jsonData.Ratings[1].Value);
+                console.log("Country:" + jsonData.Country);
+                console.log("Language:" + jsonData.Language);
+                console.log("Plot:" + jsonData.Plot);
+                console.log("Actors:" + jsonData.Actors);
+                fs.appendFile("log.txt", "Title:" + jsonData.Title + "\nYear:" + jsonData.Year + "\nIMDB Rating:" + jsonData.imdbRating + "\nRotten Tomatoes Rating:" + jsonData.Ratings[1].Value + "\nCountry:" + jsonData.Country + "\nLanguage:" + jsonData.Language + "\nPlot:" + jsonData.Plot + "\nActors:" + jsonData.Actors + divider + "\n", function(err) {
+                    if (err) throw err;
+                });
             };
         });
     };
