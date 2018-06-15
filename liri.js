@@ -8,13 +8,10 @@ var fs = require("fs");
 var client = new Twitter(keys.twitter);
 var spotify = new Spotify(keys.spotify);
 var cmd = process.argv[2];
-var queryArr = [];
-var queryJoined = "";
-var queryJoinedPlus = "";
+var queryJoined = process.argv.splice(3).join(" ");
 var divider = "\n==================================================================\n";
 
 function takeCmd() {
-    takeQuery();
     if (cmd === "my-tweets") {
         myTweets();
     } else if (cmd === "spotify-this-song") {
@@ -28,28 +25,23 @@ function takeCmd() {
     };
 };
 
-function takeQuery() {
-    for (var i = 3; i < process.argv.length; i++) {
-        queryArr.push(process.argv[i]);
-    };
-    queryJoined = queryArr.join(" ");
-    queryJoinedPlus = queryArr.join("+");
-};
-
 function myTweets() {
     var maxTweets = 20;
-    var params = {screen_name: 'Liri31970224'};
+    if (queryJoined === "") {
+        var params = {screen_name: "Liri31970224"};
+    } else {
+        var params = {screen_name: queryJoined};  
+    };
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
         if (!error) {
-            // console.log(tweets[0]);
+            var outputArr = [];
             for (var i = 0; i < maxTweets; i ++) {
                 console.log("Tweet: " + tweets[i].text);
                 console.log("Created: " + tweets[i].created_at);
-                fs.appendFile("log.txt", "Tweet: " + tweets[i].text + "\nCreated: " + tweets[i].created_at, function(err) {
-                    if (err) throw err;
-                });
+                outputArr.push("Tweet: " + tweets[i].text + "\nCreated: " + tweets[i].created_at + "\n"); 
             };
-            fs.appendFile("log.txt", divider + "\n", function(err) {
+            outputJoined = outputArr.join("");
+            fs.appendFile("log.txt", outputJoined + divider + "\n", function(err) {
                 if (err) throw err;
             });
         };
@@ -58,85 +50,49 @@ function myTweets() {
 
 function spotifyThisSong() {
     if (queryJoined === "") {
-        queryJoined = "The Sign";
-        spotify
-        .search({type: "track", query: queryJoined})
-        .then(function(response) {
-            // console.log(JSON.stringify(response.tracks.items[7], null, 2));
-            console.log("Track: " + response.tracks.items[7].name);
-            console.log("Artist: " + response.tracks.items[7].artists[0].name);
-            console.log("Album: " + response.tracks.items[7].album.name);
-            console.log("Link: " + response.tracks.items[7].external_urls.spotify);
-            fs.appendFile("log.txt", "Track: " + response.tracks.items[7].name + "\nArtist: " + response.tracks.items[7].artists[0].name + "\nAlbum: " + response.tracks.items[7].album.name + "\nLink: " + response.tracks.items[7].external_urls.spotify + divider + "\n", function(err) {
-                if (err) throw err;
-            });
-        }).catch(function(err) {
-            console.log(err);
+        queryJoined = "Ace of Base The Sign";
+    } else {}
+    spotify
+    .search({ type: "track", query: queryJoined, limit: "1"})
+    .then(function(response) {
+        // console.log(JSON.stringify(response.tracks.items[0], null, 2));
+        console.log("Track: " + response.tracks.items[0].name);
+        console.log("Artist: " + response.tracks.items[0].artists[0].name);
+        console.log("Album: " + response.tracks.items[0].album.name);
+        console.log("Link: " + response.tracks.items[0].external_urls.spotify);
+        fs.appendFile("log.txt", "Track: " + response.tracks.items[0].name + "\nArtist: " + response.tracks.items[0].artists[0].name + "\nAlbum: " + response.tracks.items[0].album.name + "\nLink: " + response.tracks.items[0].external_urls.spotify + "\n" + divider + "\n", function(err) {
+            if (err) throw err;
         });
-    } else {
-        spotify
-        .search({ type: "track", query: queryJoined, limit: "1"})
-        .then(function(response) {
-            // console.log(JSON.stringify(response.tracks.items[0], null, 2));
-            console.log("Track: " + response.tracks.items[0].name);
-            console.log("Artist: " + response.tracks.items[0].artists[0].name);
-            console.log("Album: " + response.tracks.items[0].album.name);
-            console.log("Link: " + response.tracks.items[0].external_urls.spotify);
-            fs.appendFile("log.txt", "Track: " + response.tracks.items[0].name + "\nArtist: " + response.tracks.items[0].artists[0].name + "\nAlbum: " + response.tracks.items[0].album.name + "\nLink: " + response.tracks.items[0].external_urls.spotify + divider + "\n", function(err) {
-                if (err) throw err;
-            });
-        }).catch(function(err) {
-            console.log(err);
-        });
-    };
+    }).catch(function(err) {
+        console.log(err);
+    });
 };
 
 function movieThis() {
-    var queryURL = "https://www.omdbapi.com/?t=" + queryJoinedPlus + "&y=&plot=short&apikey=trilogy";
-    if (queryJoinedPlus === "") {
-        queryURL = "https://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy";
-        request(queryURL, function (error, response, body) {
-            if (error) {
-                console.log('error:', error);
-            } else if (!error && response.statusCode === 200) {
-            // console.log('statusCode:', response && response.statusCode);
-            // console.log('body:', JSON.parse(body));
-                var jsonData = JSON.parse(body);
-                console.log("Title:" + jsonData.Title);
-                console.log("Year:" + jsonData.Year);
-                console.log("IMDB Rating:" + jsonData.imdbRating);
-                console.log("Rotten Tomatoes Rating:" + jsonData.Ratings[1].Value);
-                console.log("Country:" + jsonData.Country);
-                console.log("Language:" + jsonData.Language);
-                console.log("Plot:" + jsonData.Plot);
-                console.log("Actors:" + jsonData.Actors);
-                fs.appendFile("log.txt", "Title:" + jsonData.Title + "\nYear:" + jsonData.Year + "\nIMDB Rating:" + jsonData.imdbRating + "\nRotten Tomatoes Rating:" + jsonData.Ratings[1].Value + "\nCountry:" + jsonData.Country + "\nLanguage:" + jsonData.Language + "\nPlot:" + jsonData.Plot + "\nActors:" + jsonData.Actors + divider + "\n", function(err) {
-                    if (err) throw err;
-                });
-            };
-        });
+    if (queryJoined === "") {
+        var queryURL = "https://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy";
     } else {
-        request(queryURL, function (error, response, body) {
-            if (error) {
-                console.log('error:', error);
-            } else if (!error && response.statusCode === 200) {
-                // console.log('statusCode:', response && response.statusCode);
-                // console.log('body:', JSON.parse(body));
-                var jsonData = JSON.parse(body);
-                console.log("Title:" + jsonData.Title);
-                console.log("Year:" + jsonData.Year);
-                console.log("IMDB Rating:" + jsonData.imdbRating);
-                console.log("Rotten Tomatoes Rating:" + jsonData.Ratings[1].Value);
-                console.log("Country:" + jsonData.Country);
-                console.log("Language:" + jsonData.Language);
-                console.log("Plot:" + jsonData.Plot);
-                console.log("Actors:" + jsonData.Actors);
-                fs.appendFile("log.txt", "Title:" + jsonData.Title + "\nYear:" + jsonData.Year + "\nIMDB Rating:" + jsonData.imdbRating + "\nRotten Tomatoes Rating:" + jsonData.Ratings[1].Value + "\nCountry:" + jsonData.Country + "\nLanguage:" + jsonData.Language + "\nPlot:" + jsonData.Plot + "\nActors:" + jsonData.Actors + divider + "\n", function(err) {
-                    if (err) throw err;
-                });
-            };
-        });
+        var queryURL = "https://www.omdbapi.com/?t=" + queryJoined + "&y=&plot=short&apikey=trilogy";
     };
+    request(queryURL, function (error, response, body) {
+        if (error) {
+            console.log('error:', error);
+        } else if (!error && response.statusCode === 200) {
+            // console.log('statusCode:', response && response.statusCode);
+            var jsonData = JSON.parse(body);
+            console.log("Title: " + jsonData.Title);
+            console.log("Year: " + jsonData.Year);
+            console.log("IMDB Rating: " + jsonData.imdbRating);
+            console.log("Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value);
+            console.log("Country: " + jsonData.Country);
+            console.log("Language: " + jsonData.Language);
+            console.log("Plot: " + jsonData.Plot);
+            console.log("Actors: " + jsonData.Actors);
+            fs.appendFile("log.txt", "Title: " + jsonData.Title + "\nYear: " + jsonData.Year + "\nIMDB Rating: " + jsonData.imdbRating + "\nRotten Tomatoes Rating: " + jsonData.Ratings[1].Value + "\nCountry: " + jsonData.Country + "\nLanguage: " + jsonData.Language + "\nPlot: " + jsonData.Plot + "\nActors: " + jsonData.Actors + "\n" + divider + "\n", function(err) {
+                if (err) throw err;
+            });
+        };
+    });
 };
 
 function doWhatItSays() {
@@ -145,7 +101,7 @@ function doWhatItSays() {
             return console.log(err);
         } else {
             var allCmds = data.split("\n");
-            // console.log(allCmds);
+            console.log(allCmds)
             for (var i = 0; i < allCmds.length; i++) {
                 data = allCmds[i];
                 if (data.includes(",")) {
@@ -153,20 +109,15 @@ function doWhatItSays() {
                     cmd = textArr[0];
                     var textQuery = textArr[1];
                     var textQueryArr = textQuery.split(" ");
-                    queryArr = textQueryArr;
-                    var textQueryJoined = queryArr.join(" ");
-                    var textQueryJoinedPlus = queryArr.join("+");
+                    var textQueryJoined = textQueryArr.join(" ");
                     queryJoined = textQueryJoined;
-                    queryJoinedPlus = textQueryJoinedPlus;
+                    takeCmd();
                 } else {
                     cmd = data;
+                    queryJoined = "";
+                    takeCmd();
                 };
-                // console.log(cmd);
-                // console.log(queryArr);
-                // console.log(queryJoined);
-                // console.log(queryJoinedPlus);
-                takeCmd();
-            }
+            };
         };
     });
 };
